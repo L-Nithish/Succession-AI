@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterviewAce AI | Project Walkthrough</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --panel-bg: rgba(22, 22, 26, 0.65);
+            --border-color: rgba(255, 255, 255, 0.05);
+            --text-color: #f5f5f7;
+            --text-muted: #94a3b8;
+            --purple-glow: rgba(168, 85, 247, 0.15);
+            --blue-glow: rgba(0, 102, 255, 0.15);
+            --brand-purple: #a855f7;
+            --brand-cyan: #06b6d4;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Ambient Glows */
+        .glow-1 {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 300px;
+            background: var(--purple-glow);
+            filter: blur(120px);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            background: linear-gradient(135deg, #ffffff 0%, var(--brand-purple) 60%, #0066ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 300;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            margin-top: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 10px;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        h3 {
+            font-size: 1rem;
+            color: var(--brand-purple);
+            margin: 20px 0 10px 0;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        li {
+            font-size: 0.85rem;
+            color: #d1d5db;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--brand-cyan);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        pre {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            border: none;
+            color: #e2e8f0;
+        }
+
+        .img-container {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 20px;
+            background: #000;
+        }
+
+        .img-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #ffffff;
+            color: #000000;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 10px 20px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-1"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>InterviewAce AI</h1>
+            <div class="subtitle">AI-Powered Interview Preparation Ecosystem Walkthrough</div>
+        </div>
+
+        <div class="card">
+            <h2>Technical Stack Summary</h2>
+            <h3>Backend (Spring Boot 3 + Java 21)</h3>
+            <ul>
+                <li><strong>Stateless Security:</strong> JWT filters with token rotation.</li>
+                <li><strong>WebSocket Brokers:</strong> Live SockJS chat channels with typing triggers.</li>
+                <li><strong>Local Compiler Sandbox:</strong> Curly braces checker emitting execution logs.</li>
+                <li><strong>AI Fallback:</strong> Fully offline keyword scoring engine.</li>
+            </ul>
+
+            <h3>Frontend (Next.js 14 + Tailwind CSS)</h3>
+            <ul>
+                <li><strong>Cinematic Theme:</strong> Deep blacks, glowing borders, and glass cards.</li>
+                <li><strong>Smooth Scrolling:</strong> Lenis RAF loop scrolling implementation.</li>
+                <li><strong>6 Routes:</strong> Home Landing, Features Analyzer, Mock Sandbox Room, Analytics Stats, Recruiter Rankings, Pricing Tiers.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Verification Scores</h2>
+            <ul>
+                <li><strong>Backend Compilation:</strong> <code>mvn clean compile</code> runs with <code>BUILD SUCCESS</code> (39 source files packaged).</li>
+                <li><strong>Frontend Compilation:</strong> <code>npm run build</code> builds cleanly with <code>✓ Compiled successfully</code> (9 static routes compiled).</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Launch Instructions</h2>
+            <p>Since Docker is not configured on the local host path, you can run the entire database-connected stack directly on Windows:</p>
+            <h3>Step 1: PostgreSQL Setup</h3>
+            <p>Ensure PostgreSQL is listening on port <code>5432</code> with username <code>postgres</code> and password <code>postgres</code>, and that database <code>interviewacedb</code> exists.</p>
+            <h3>Step 2: Start Spring Boot Backend</h3>
+            <pre><code>C:\Users\dexte\.m2\wrapper\dists\apache-maven-3.9.16-bin\5grr65jo27hi51sujmtcldfovl\apache-maven-3.9.16\bin\mvn.cmd spring-boot:run</code></pre>
+            <h3>Step 3: Start Next.js Frontend</h3>
+            <pre><code>npm.cmd run dev</code></pre>
+            <p>Once started, access the interfaces:</p>
+            <ul>
+                <li><strong>Frontend Web App:</strong> <a href="http://localhost:3000" style="color: var(--brand-cyan);" target="_blank">http://localhost:3000</a></li>
+                <li><strong>Backend REST API:</strong> <a href="http://localhost:8080/api/auth/register" style="color: var(--brand-cyan);" target="_blank">http://localhost:8080/api/auth/register</a></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>Cinematic Homepage Mock-up</h2>
+            <p>Below is the visual mockup of the frontend design generated for this platform:</p>
+            <div class="img-container">
+                <img src="./interview_ace_homepage_ui_1781127992400.png" alt="InterviewAce Homepage Mockup">
+            </div>
+        </div>
+    </div>
+</body>
+</html>
