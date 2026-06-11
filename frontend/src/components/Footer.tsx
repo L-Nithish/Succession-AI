@@ -10,7 +10,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12 relative z-10">
         <div className="md:col-span-2">
           <div className="flex items-center gap-3 mb-4">
-            <svg className="w-6 h-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="24" height="24" className="w-6 h-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="footer-logo-grad" x1="0%" y1="100%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#0066ff" />
