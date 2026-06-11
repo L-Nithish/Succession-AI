@@ -101,7 +101,7 @@ export default function PricingPage() {
 
         {/* Newsletter Signup Community */}
         <div className="max-w-4xl mx-auto p-10 rounded-2xl border border-charcoal-light bg-charcoal/10 backdrop-blur-md text-center space-y-6">
-          <h3 className="text-lg md:text-2xl font-display font-semibold text-white">Join the InterviewAce Community</h3>
+          <h3 className="text-lg md:text-2xl font-display font-semibold text-white">Join the Succession.AI Community</h3>
           <p className="text-gray-400 text-xs max-w-md mx-auto leading-relaxed font-light">
             Subscribe to our weekly engineering newsletter to get system design checklists, mock interview sheets, and compiler sandbox guides directly to your inbox.
           </p>

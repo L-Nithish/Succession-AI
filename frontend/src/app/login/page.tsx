@@ -108,7 +108,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 required
-                placeholder="dexter@interviewace.ai"
+                placeholder="dexter@succession.ai"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-charcoal/50 border border-charcoal-light rounded-lg px-4 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-brand-purple"

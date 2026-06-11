@@ -9,18 +9,28 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12 relative z-10">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-brand-purple to-brand-blue flex items-center justify-center">
-              <span className="text-white font-bold text-xs">A</span>
-            </div>
-            <span className="font-display font-semibold tracking-tight text-white">
-              Interview<span className="text-gray-400">Ace</span>
+          <div className="flex items-center gap-3 mb-4">
+            <svg className="w-6 h-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="footer-logo-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#0066ff" />
+                  <stop offset="50%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+              </defs>
+              <path d="M25 80 H50 V50 H75 V20" stroke="url(#footer-logo-grad)" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="25" cy="80" r="10" fill="#0066ff" />
+              <circle cx="50" cy="50" r="10" fill="#a855f7" />
+              <circle cx="75" cy="20" r="10" fill="#ec4899" />
+            </svg>
+            <span className="font-display text-sm font-black tracking-widest text-white uppercase">
+              SUCCESSION<span className="text-brand-purple">.AI</span>
             </span>
           </div>
           <p className="text-gray-400 text-xs max-w-sm leading-relaxed mb-6">
             Elite AI-powered interview preparation ecosystem. We train candidates for hard technical, behavioral, and system design pipelines using deep neural scoring and cinematic simulations.
           </p>
-          <span className="text-xs text-gray-500">© 2026 InterviewAce Inc. All rights reserved.</span>
+          <span className="text-xs text-gray-500">© 2026 Succession.AI Inc. All rights reserved.</span>
         </div>
 
         <div>

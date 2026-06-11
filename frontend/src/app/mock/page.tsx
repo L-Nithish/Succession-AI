@@ -127,7 +127,7 @@ export default function MockPage() {
             setMessages([
               {
                 sender: "AI Interviewer",
-                content: `Welcome to your InterviewAce AI mock session. Today, we'll cover key Java backend architectural elements, database locking, and event structures.\n\nLet's begin:\n${qList[0].questionText}`,
+                content: `Welcome to your Succession.AI mock session. Today, we'll cover key Java backend architectural elements, database locking, and event structures.\n\nLet's begin:\n${qList[0].questionText}`,
                 type: 'CHAT'
               }
             ]);

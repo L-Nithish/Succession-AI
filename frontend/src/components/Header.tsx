@@ -23,12 +23,22 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-charcoal-light bg-background/60 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-purple to-brand-blue flex items-center justify-center shadow-glowing">
-            <span className="text-white font-bold text-sm">A</span>
-          </div>
-          <span className="font-display font-semibold tracking-tight text-white group-hover:text-brand-purple transition-colors">
-            Interview<span className="text-gray-400">Ace</span>
+        <Link href="/" className="flex items-center gap-3 group">
+          <svg className="w-8 h-8 transform group-hover:scale-105 transition-transform duration-300" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logo-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#0066ff" />
+                <stop offset="50%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#ec4899" />
+              </linearGradient>
+            </defs>
+            <path d="M25 80 H50 V50 H75 V20" stroke="url(#logo-grad)" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="25" cy="80" r="10" fill="#0066ff" />
+            <circle cx="50" cy="50" r="10" fill="#a855f7" />
+            <circle cx="75" cy="20" r="10" fill="#ec4899" />
+          </svg>
+          <span className="font-display text-lg font-black tracking-widest text-white transition-colors duration-300">
+            SUCCESSION<span className="text-brand-purple">.AI</span>
           </span>
         </Link>
 

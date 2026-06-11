@@ -19,7 +19,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "InterviewAce AI | Elite Interview Preparation Ecosystem",
+  title: "Succession AI | Elite Interview Preparation Ecosystem",
   description: "AI-Powered mock interviews, live resume analysis, coding sandbox, and real-time behavioral coaching designed with cinematic luxury and intelligent evaluation.",
 };
 
