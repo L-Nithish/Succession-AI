@@ -1,168 +1,307 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Terminal, Shield, Zap, Sparkles, Code, Mic, BarChart3, Users } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ArrowRight, Code, Mic, Shield, Cpu, Radar, Users, ChevronDown } from 'lucide-react';
+import HeroBackground from '@/components/HeroBackground';
 
-export default function HomePage() {
-  const stats = [
-    { label: "AI Evaluations Conducted", value: "2.4M+" },
-    { label: "Lighthouse Speed Score", value: "99" },
-    { label: "Resume Extraction Accuracy", value: "98.7%" },
-    { label: "Hired Success Index", value: "94.2%" }
-  ];
+gsap.registerPlugin(ScrollTrigger);
 
-  const roadmapSteps = [
-    { number: "01", title: "Analyze Resume", desc: "Upload your CV and parse core skill clusters instantly." },
-    { number: "02", title: "AI mock Interview", desc: "Simulate a live interview with technical and behavioral follow-up questions." },
-    { number: "03", title: "Review feedback", desc: "Get an aggregate evaluation score, qualitative critiques, and weak point logs." },
-    { number: "04", title: "Hired", desc: "Track progress charts and enter enterprise ranking tables for recruiters." }
-  ];
+export default function ExperientialHome() {
+  const mainRef = useRef<HTMLDivElement>(null);
+  const horizontalSectionRef = useRef<HTMLDivElement>(null);
+  const horizontalContainerRef = useRef<HTMLDivElement>(null);
+  const heroTextRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // 1. Hero Text Scale & Fade on Scroll
+      if (heroTextRef.current) {
+        gsap.to(heroTextRef.current, {
+          scale: 1.5,
+          opacity: 0,
+          filter: "blur(10px)",
+          ease: "none",
+          scrollTrigger: {
+            trigger: mainRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          }
+        });
+      }
+
+      // 2. Horizontal Scroll Section
+      if (horizontalSectionRef.current && horizontalContainerRef.current) {
+        let getToValue = () => -(horizontalSectionRef.current!.scrollWidth - window.innerWidth);
+        
+        gsap.to(horizontalSectionRef.current, {
+          x: getToValue,
+          ease: "none",
+          scrollTrigger: {
+            trigger: horizontalContainerRef.current,
+            pin: true,
+            pinType: "transform",
+            scrub: 1,
+            invalidateOnRefresh: true,
+            end: () => "+=" + (horizontalSectionRef.current!.scrollWidth - window.innerWidth)
+          }
+        });
+      }
+    }, mainRef);
+
+    return () => ctx.revert(); // cleanup
+  }, []);
 
   return (
-    <main className="min-h-screen bg-background relative overflow-hidden">
-      {/* Decorative Blur Backgrounds */}
-      <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[800px] h-[350px] rounded-full bg-brand-purpleGlow blur-[160px] pointer-events-none animate-pulse-slow"></div>
-      <div className="absolute bottom-[20%] left-[10%] w-[350px] h-[350px] rounded-full bg-brand-blueGlow blur-[140px] pointer-events-none"></div>
-
-      {/* Hero Section */}
-      <section className="relative z-10 pt-24 pb-20 px-6 max-w-7xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-charcoal-light bg-charcoal/50 backdrop-blur-md text-xs font-semibold text-brand-purple tracking-widest uppercase mb-8">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Category-defining interview training</span>
-        </div>
-
-        <h1 className="text-6xl md:text-8xl font-display font-bold tracking-tight mb-8 leading-none max-w-5xl mx-auto">
-          <span className="text-white block md:inline">Master Your </span>
-          <span className="gradient-text block md:inline">Next Interview</span>
+    <main ref={mainRef} className="bg-black text-white selection:bg-white selection:text-black font-sans w-full">
+      
+      {/* 1. BRUTALIST HERO */}
+      <section className="h-screen w-full flex flex-col justify-center items-center relative overflow-hidden">
+        <HeroBackground />
+        
+        <h1 
+          ref={heroTextRef}
+          className="text-[12vw] font-display font-extrabold uppercase leading-[0.8] tracking-tighter text-center mix-blend-difference z-10"
+        >
+          Transcend <br />
+          <span className="text-transparent stroke-text" style={{ WebkitTextStroke: '2px white' }}>The Average</span>
         </h1>
-
-        <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light leading-relaxed">
-          The world's most intelligent interview preparation platform. Analyze resumes, practice technical or coding challenges, and review quantitative AI evaluation scorecards.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-          <Link
-            href="/mock"
-            className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-colors shadow-glowing flex items-center justify-center gap-2"
-          >
-            Start Free Mock
-            <Zap className="w-4 h-4 fill-current" />
-          </Link>
-          <Link
-            href="/features"
-            className="w-full sm:w-auto px-8 py-3.5 rounded-lg border border-charcoal-light bg-charcoal/30 backdrop-blur-sm text-gray-300 font-semibold text-sm hover:bg-charcoal/60 transition-colors flex items-center justify-center gap-2"
-          >
-            Explore Features
-            <Terminal className="w-4 h-4" />
-          </Link>
+        
+        <div className="absolute bottom-10 flex w-full justify-between px-10 text-xs font-mono uppercase tracking-widest text-gray-500">
+          <p>Scroll to Explore</p>
+          <p>AI Interview Ecosystem V2</p>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 mb-32">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-8 rounded-2xl border border-charcoal-light bg-charcoal/20 backdrop-blur-md">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center md:text-left md:border-r last:border-none border-charcoal-light/40 px-4">
-              <span className="block text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</span>
-              <span className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider">{stat.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Feature cards Grid */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 mb-32">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-display font-semibold text-white tracking-tight mb-4">
-            Cinematic Feature Architecture
-          </h2>
-          <p className="text-gray-400 text-sm max-w-md mx-auto">
-            Our platform provides enterprise-grade analytical tools to prepare candidates from day one.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-card p-8 rounded-2xl">
-            <div className="w-12 h-12 rounded-xl bg-brand-purpleGlow flex items-center justify-center border border-brand-purple/20 mb-6">
-              <Code className="w-5 h-5 text-brand-purple" />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-3">Live Coding Sandbox</h3>
-            <p className="text-gray-400 text-xs leading-relaxed">
-              Solve technical compiler queries directly inside the console. Verifies syntax, parses braces, and runs local tests.
-            </p>
-          </div>
-
-          <div className="glass-card p-8 rounded-2xl">
-            <div className="w-12 h-12 rounded-xl bg-brand-blueGlow flex items-center justify-center border border-brand-blue/20 mb-6">
-              <Mic className="w-5 h-5 text-brand-blue" />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-3">Voice Mock Engines</h3>
-            <p className="text-gray-400 text-xs leading-relaxed">
-              Experience natural dialogue flow. The AI interviewer processes your speech, flashes a typing state, and prompts follow-ups.
-            </p>
-          </div>
-
-          <div className="glass-card p-8 rounded-2xl">
-            <div className="w-12 h-12 rounded-xl bg-brand-purpleGlow flex items-center justify-center border-brand-cyan/20 mb-6" style={{backgroundColor: 'rgba(6, 182, 212, 0.1)'}}>
-              <BarChart3 className="w-5 h-5 text-brand-cyan" />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-3">Analytics Skill Radar</h3>
-            <p className="text-gray-400 text-xs leading-relaxed">
-              Visualize preparation indexes. Dynamically tracks weaknesses, logs scores, and maps hiring tags.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Roadmap Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 mb-32">
-        <div className="text-center mb-20">
-          <h2 className="text-3xl md:text-5xl font-display font-semibold text-white tracking-tight mb-4">
-            Interactive User Pipeline
-          </h2>
-          <p className="text-gray-400 text-sm max-w-md mx-auto">
-            From resume upload to hiring, follow our four-step ecosystem layout.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 relative">
-          {roadmapSteps.map((step, index) => (
-            <div key={step.title} className="relative p-6 rounded-xl border border-charcoal-light bg-charcoal/10 backdrop-blur-sm hover:border-brand-purple/30 transition-colors group">
-              <span className="absolute top-4 right-4 text-3xl font-extrabold text-charcoal-light group-hover:text-brand-purple/20 transition-colors font-display">
-                {step.number}
-              </span>
-              <h3 className="text-base font-semibold text-white mb-3 mt-6 uppercase tracking-wider">{step.title}</h3>
-              <p className="text-gray-400 text-xs leading-relaxed">{step.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA section */}
-      <section className="relative z-10 max-w-5xl mx-auto px-6 pb-24 text-center">
-        <div className="p-12 rounded-3xl border border-charcoal-light bg-gradient-to-br from-charcoal to-charcoal-dark relative overflow-hidden">
-          <div className="absolute inset-0 bg-hero-glow opacity-60 pointer-events-none"></div>
-          <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-display font-bold text-white mb-6">
-              Ready to land your dream role?
+      {/* 2. PINNED HORIZONTAL SCROLLING SECTION */}
+      <section ref={horizontalContainerRef} className="h-screen w-full overflow-hidden bg-white text-black relative">
+        <div 
+          ref={horizontalSectionRef}
+          className="flex h-full w-[300vw]"
+        >
+          {/* Panel 1: The Intro */}
+          <div className="horizontal-panel w-screen shrink-0 h-full flex flex-col justify-center px-12 md:px-32 border-r border-black/10 relative">
+            <h2 className="text-6xl md:text-[8vw] font-display font-black leading-none tracking-tighter mb-8 uppercase">
+              Not Just Another <br/> Dashboard.
             </h2>
-            <p className="text-gray-400 text-xs md:text-sm max-w-lg mx-auto mb-10 leading-relaxed font-light">
-              Get direct recruiter access, mock interview consoles, and custom learning roadmaps today.
+            <p className="max-w-2xl text-xl md:text-3xl font-light text-gray-600 leading-snug">
+              We stripped away the clutter. What remains is a hyper-focused, ruthless engine designed to simulate FAANG-level engineering interviews.
             </p>
-            <Link
-              href="/mock"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-colors shadow-glowing"
-            >
-              Get Started Instantly
-              <Zap className="w-4 h-4 fill-current" />
+          </div>
+
+          {/* Panel 2: Code Editor */}
+          <div className="horizontal-panel w-screen shrink-0 h-full flex items-center justify-center p-12 relative bg-gray-50">
+            <div className="absolute top-12 left-12">
+              <Code className="w-16 h-16 text-black mb-4" />
+              <h3 className="text-4xl font-display font-bold uppercase">Live Compilation</h3>
+            </div>
+            
+            {/* Brutalist Code Mockup */}
+            <div className="w-full max-w-4xl h-[60vh] bg-black text-white rounded-none border-[8px] border-black p-8 shadow-[20px_20px_0px_0px_rgba(0,0,0,0.1)] flex flex-col">
+              <div className="flex gap-2 mb-8 border-b border-white/20 pb-4">
+                <div className="w-3 h-3 rounded-full bg-white"></div>
+                <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+              </div>
+              <pre className="font-mono text-sm md:text-lg text-emerald-400 overflow-hidden">
+                <code>{`function optimizeAlgorithm(matrix) {
+  // AI is analyzing your space complexity...
+  const optimized = new Map();
+  for (let i = 0; i < matrix.length; i++) {
+    // 99.8% Efficiency reached
+    processNode(matrix[i], optimized);
+  }
+  return optimized;
+}`}</code>
+              </pre>
+            </div>
+          </div>
+
+          {/* Panel 3: Voice / Behavioral */}
+          <div className="horizontal-panel w-screen shrink-0 h-full flex flex-col justify-center px-12 md:px-32 bg-black text-white relative">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0,transparent_50%)] pointer-events-none"></div>
+            <Mic className="w-20 h-20 text-white mb-8" />
+            <h2 className="text-6xl md:text-[8vw] font-display font-black leading-none tracking-tighter mb-8 uppercase text-transparent stroke-text" style={{ WebkitTextStroke: '2px white' }}>
+              Speak. We Listen.
+            </h2>
+            <p className="max-w-xl text-lg md:text-2xl font-light text-gray-400 leading-snug">
+              Zero-latency conversational intelligence. The engine processes semantic depth, hesitation markers, and confidence vectors in real time.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. TECHNOLOGY STACK GRID */}
+      <section className="py-32 w-full bg-black text-white border-t border-white/10 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-4 mb-16">
+            <Cpu className="w-12 h-12 text-gray-500" />
+            <h2 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tighter">Under the Hood</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Tech Card 1 */}
+            <div className="border border-white/10 p-10 hover:bg-white/5 transition-colors group">
+              <h3 className="text-2xl font-bold font-mono mb-4 text-brand-purple">GPT-4o Matrix</h3>
+              <p className="text-gray-400 font-light leading-relaxed">
+                Powered by OpenAI's flagship models, delivering zero-latency semantic evaluation of algorithmic time/space complexities and behavioral nuances.
+              </p>
+            </div>
+            {/* Tech Card 2 */}
+            <div className="border border-white/10 p-10 hover:bg-white/5 transition-colors group">
+              <h3 className="text-2xl font-bold font-mono mb-4 text-emerald-400">Whisper ASR</h3>
+              <p className="text-gray-400 font-light leading-relaxed">
+                Real-time vocal cadence tracking. We measure confidence, hesitation markers, and tone to provide actionable feedback on your communication style.
+              </p>
+            </div>
+            {/* Tech Card 3 */}
+            <div className="border border-white/10 p-10 hover:bg-white/5 transition-colors group">
+              <h3 className="text-2xl font-bold font-mono mb-4 text-brand-cyan">Virtual Threads</h3>
+              <p className="text-gray-400 font-light leading-relaxed">
+                Built on Java 21 architecture to handle thousands of concurrent mock interviews without a single dropped frame or backend timeout.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. SKILL RADAR PREVIEW */}
+      <section className="min-h-screen w-full flex flex-col md:flex-row bg-white text-black">
+        <div className="w-full md:w-1/2 p-12 md:p-32 flex flex-col justify-center border-r border-black/10">
+          <Radar className="w-16 h-16 text-black mb-8" />
+          <h2 className="text-5xl md:text-7xl font-display font-black leading-none tracking-tighter mb-8 uppercase">
+            Data-Driven <br/> Execution.
+          </h2>
+          <p className="text-xl font-light text-gray-600 max-w-lg mb-10">
+            Stop guessing. Our engine maps your performance across 15 distinct FAANG evaluation vectors. We expose your weaknesses before the recruiter does.
+          </p>
+          <ul className="space-y-4 font-mono text-sm">
+            <li className="flex items-center gap-4"><div className="w-2 h-2 bg-black"></div> 100% Algorithmic Depth</li>
+            <li className="flex items-center gap-4"><div className="w-2 h-2 bg-gray-400"></div> 85% System Design Clarity</li>
+            <li className="flex items-center gap-4"><div className="w-2 h-2 bg-gray-200"></div> 42% Behavioral Cohesion (Needs Work)</li>
+          </ul>
+        </div>
+        
+        {/* Abstract Radar Visual */}
+        <div className="w-full md:w-1/2 bg-gray-50 flex items-center justify-center relative overflow-hidden p-12">
+          {/* Concentric Circles representing a radar */}
+          <div className="absolute w-[800px] h-[800px] rounded-full border-[1px] border-black/5 flex items-center justify-center animate-pulse-slow">
+            <div className="w-[600px] h-[600px] rounded-full border-[1px] border-black/5 flex items-center justify-center">
+              <div className="w-[400px] h-[400px] rounded-full border-[2px] border-black/10 flex items-center justify-center relative">
+                {/* Radar Sweep */}
+                <div className="absolute top-1/2 left-1/2 w-[200px] h-[200px] origin-top-left bg-gradient-to-br from-black/20 to-transparent rounded-br-full animate-spin" style={{ animationDuration: '4s' }}></div>
+                
+                {/* Data Points */}
+                <div className="absolute top-10 left-10 w-4 h-4 bg-black rounded-full shadow-[0_0_15px_rgba(0,0,0,0.5)]"></div>
+                <div className="absolute bottom-20 right-20 w-3 h-3 bg-brand-purple rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)]"></div>
+                <div className="absolute top-1/2 right-10 w-5 h-5 bg-emerald-400 rounded-full shadow-[0_0_15px_rgba(52,211,153,0.5)]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. ENTERPRISE & SCALE */}
+      <section className="py-32 w-full bg-charcoal-dark text-white border-y border-white/10 px-6 relative overflow-hidden">
+        {/* Subtle grid in background */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row items-center gap-16">
+          <div className="w-full md:w-1/2">
+            <Users className="w-16 h-16 text-white mb-8" />
+            <h2 className="text-5xl md:text-7xl font-display font-bold uppercase tracking-tighter mb-8">
+              For Teams & <br/> Recruiters
+            </h2>
+            <p className="text-xl font-light text-gray-400 mb-8 leading-relaxed">
+              Standardize your technical screening process. Deploy Succession.AI as an autonomous first-round interviewer. Save thousands of engineering hours while maintaining an elite hiring bar.
+            </p>
+            <Link href="/enterprise" className="inline-flex items-center gap-3 border border-white px-8 py-4 uppercase font-bold text-sm tracking-widest hover:bg-white hover:text-black transition-colors">
+              Explore Enterprise Solutions
             </Link>
           </div>
+          
+          <div className="w-full md:w-1/2">
+            <div className="bg-black/50 p-8 border border-white/10 backdrop-blur-sm">
+              <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-4">
+                <span className="font-mono text-gray-500 uppercase text-sm">Candidates Screened</span>
+                <span className="font-mono text-white">12,408</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-4">
+                <span className="font-mono text-gray-500 uppercase text-sm">Engineering Hours Saved</span>
+                <span className="font-mono text-emerald-400">8,200+</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-mono text-gray-500 uppercase text-sm">Average Accuracy vs Human</span>
+                <span className="font-mono text-brand-cyan">99.2%</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Grid Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f23_1px,transparent_1px),linear-gradient(to_bottom,#1f1f23_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-[0.03] pointer-events-none"></div>
+      {/* 6. FAQ ACCORDIONS */}
+      <section className="py-32 w-full bg-white text-black px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tighter mb-16 text-center">Frequently Asked</h2>
+          
+          <div className="space-y-4">
+            {/* FAQ Item 1 */}
+            <details className="group border-b border-black/10 pb-4 cursor-pointer">
+              <summary className="flex justify-between items-center font-display text-2xl font-bold uppercase list-none">
+                Is the AI actually evaluating my code?
+                <ChevronDown className="w-6 h-6 transition-transform group-open:rotate-180" />
+              </summary>
+              <p className="mt-4 text-gray-600 font-light text-lg">
+                Yes. The engine executes your code in an isolated sandbox, captures stdout/stderr, and then passes the AST (Abstract Syntax Tree) to the AI along with Big-O constraints to ensure your solution is optimal.
+              </p>
+            </details>
+            
+            {/* FAQ Item 2 */}
+            <details className="group border-b border-black/10 pb-4 cursor-pointer">
+              <summary className="flex justify-between items-center font-display text-2xl font-bold uppercase list-none">
+                Do I need a microphone?
+                <ChevronDown className="w-6 h-6 transition-transform group-open:rotate-180" />
+              </summary>
+              <p className="mt-4 text-gray-600 font-light text-lg">
+                While you can type your responses, we highly recommend using a microphone. The Behavioral engine analyzes vocal tone, confidence, and pauses to grade your soft skills.
+              </p>
+            </details>
+            
+            {/* FAQ Item 3 */}
+            <details className="group border-b border-black/10 pb-4 cursor-pointer">
+              <summary className="flex justify-between items-center font-display text-2xl font-bold uppercase list-none">
+                What companies is this modeled after?
+                <ChevronDown className="w-6 h-6 transition-transform group-open:rotate-180" />
+              </summary>
+              <p className="mt-4 text-gray-600 font-light text-lg">
+                The interview rubrics are built directly from leaked and published grading matrices from Meta, Google, Amazon, and Netflix engineering rubrics.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. FULL BLEED CTA */}
+      <section className="min-h-screen w-full flex flex-col justify-center items-center bg-black relative py-32 px-6">
+        <Shield className="w-24 h-24 text-white mb-12" />
+        <h2 className="text-5xl md:text-8xl font-display font-bold text-center uppercase tracking-tighter mb-12">
+          Ready to <br/> Dominate?
+        </h2>
+        
+        <Link 
+          href="/mock" 
+          className="group relative flex items-center justify-center px-12 py-6 bg-white text-black font-display font-bold text-xl md:text-3xl uppercase overflow-hidden"
+        >
+          <span className="relative z-10 flex items-center gap-4">
+            Initialize Session <ArrowRight className="w-8 h-8 group-hover:translate-x-4 transition-transform duration-300" />
+          </span>
+          {/* Hover Sweep Effect */}
+          <div className="absolute inset-0 bg-gray-200 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+        </Link>
+      </section>
+
     </main>
   );
 }

@@ -43,34 +43,17 @@ export default function FeaturesPage() {
     setAnalyzing(true);
     setUploadError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await apiFetch("/resumes/upload", {
-        method: "POST",
-        body: formData
-        // Content-Type is omitted so browser sets boundary automatically for FormData
+    // LOCAL SHOWCASE MODE: Simulate Backend Parsing
+    setTimeout(() => {
+      setFileUploaded(true);
+      setResumeReport({
+        fileName: file.name,
+        skills: ["Java", "Spring Boot", "Kafka", "PostgreSQL", "Docker", "React"],
+        experienceSummary: "Excellent architectural layout. The resume strongly emphasizes event-driven backend systems with modern infrastructure tooling.",
+        analysisReport: "### ATS AI Scan Report\n\n#### Key Strengths\n- **Microservices:** Strong evidence of distributed systems design.\n- **Data Pipelines:** Kafka usage is well documented.\n\n#### Gaps\n- **Cloud Native:** Mention specific AWS/GCP services (like EC2 or S3) to improve parsing score."
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setFileUploaded(true);
-        setResumeReport({
-          fileName: data.fileName,
-          skills: data.skills || ["Java", "SQL"],
-          experienceSummary: data.experienceSummary,
-          analysisReport: data.analysisReport
-        });
-      } else {
-        const errText = await response.text();
-        setUploadError(errText || "Failed to process resume file.");
-      }
-    } catch (err) {
-      setUploadError("Network connection error. Ensure the backend server is running.");
-    } finally {
       setAnalyzing(false);
-    }
+    }, 2000);
   };
 
   const triggerFileInput = () => {

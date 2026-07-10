@@ -45,53 +45,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: String): Promise<boolean> => {
-    try {
-      const response = await apiFetch("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
+    // LOCAL SHOWCASE MODE: Bypass API and simulate immediate success
+    setLoading(true);
+    return new Promise((resolve) => {
+      setTimeout(() => {
         const loggedUser: User = {
-          id: data.userId,
-          email: data.email,
-          fullName: data.fullName,
-          roles: data.roles
+          id: "demo-user-id-123",
+          email: email || "demo@succession.ai",
+          fullName: "Premium Tester",
+          roles: ["ROLE_USER", "ROLE_PREMIUM"]
         };
 
-        setAccessToken(data.accessToken);
+        setAccessToken("mock-jwt-token-12345");
         setUser(loggedUser);
 
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("accessToken", "mock-jwt-token-12345");
+        localStorage.setItem("refreshToken", "mock-refresh-token-12345");
         localStorage.setItem("user", JSON.stringify(loggedUser));
-        return true;
-      }
-      return false;
-    } catch (e) {
-      console.error("Login request failed:", e);
-      return false;
-    }
+        
+        setLoading(false);
+        resolve(true);
+      }, 800); // simulate latency
+    });
   };
 
   const register = async (email: string, password: String, fullName: string, role: string): Promise<string | null> => {
-    try {
-      const response = await apiFetch("/auth/register", {
-        method: "POST",
-        body: JSON.stringify({ email, password, fullName, role })
-      });
-
-      if (response.ok) {
-        return null; // Success, no error message
-      } else {
-        const errMsg = await response.text();
-        return errMsg || "Registration failed.";
-      }
-    } catch (e) {
-      console.error("Registration request failed:", e);
-      return "Network error. Please try again.";
-    }
+    // LOCAL SHOWCASE MODE: Automatically login user after registration
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        login(email, password); // just log them in
+        resolve(null);
+      }, 800);
+    });
   };
 
   const logout = () => {

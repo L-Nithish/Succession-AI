@@ -2,6 +2,9 @@ server:
   port: 8080
 
 spring:
+  threads:
+    virtual:
+      enabled: true
   application:
     name: interviewace-backend
 
@@ -42,10 +45,12 @@ spring:
       key-serializer: org.apache.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
-# Custom Security Settings (JWT)
+# Custom Security and AI Settings
 app:
   jwt:
-    # 256-bit HS256 base64 secret (this is a placeholder secret for development)
-    secret: dGhpc2lzYW1pbmltdW0yNTZiaXRzZWNyZXRrZXlmb3Jqd3RzaWduaW5naW50ZXJ2aWV3YWNlYXBwbGljYXRpb24=
+    secret: ${JWT_SECRET:dGhpc2lzYW1pbmltdW0yNTZiaXRzZWNyZXRrZXlmb3Jqd3RzaWduaW5naW50ZXJ2aWV3YWNlYXBwbGljYXRpb24=}
     expiration-ms: 3600000 # 1 hour
     refresh-expiration-ms: 604800000 # 7 days
+  openai:
+    api-key: ${OPENAI_API_KEY:placeholder}
+    model: gpt-4o-mini

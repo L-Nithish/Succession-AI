@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.*;
 
@@ -23,6 +25,7 @@ public class AiServiceImpl implements AiService {
     private String modelName;
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public List<Map<String, String>> generateQuestionsForInterview(String jobDescription, List<String> skills, int count) {
@@ -80,13 +83,32 @@ public class AiServiceImpl implements AiService {
     // OPENAI CLIENT CALLS (Standard RestTemplate)
     // ==========================================
 
-    private List<Map<String, String>> callOpenAiForQuestions(String jobDesc, List<String> skills, int count) {
+    private String callOpenAi(String prompt) {
         String url = "https://api.openai.com/v1/chat/completions";
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
+        
+        Map<String, Object> requestBody = Map.of(
+            "model", modelName,
+            "messages", List.of(Map.of("role", "user", "content", prompt)),
+            "temperature", 0.7
+        );
+        
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+        
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+            if (choices != null && !choices.isEmpty()) {
+                Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                return (String) message.get("content");
+            }
+        }
+        throw new RuntimeException("Invalid response format from OpenAI");
+    }
 
+    private List<Map<String, String>> callOpenAiForQuestions(String jobDesc, List<String> skills, int count) {
         String prompt = String.format(
             "You are an expert interviewer. Generate %d technical interview questions based on this job description: '%s' and these skills: %s. "
             + "Respond ONLY in a JSON array format where each element is an object with keys: 'questionText', 'expectedKeywords', and 'sampleAnswer'. "
@@ -94,32 +116,47 @@ public class AiServiceImpl implements AiService {
             count, jobDesc, String.join(", ", skills)
         );
 
-        Map<String, Object> requestBody = Map.of(
-            "model", modelName,
-            "messages", List.of(Map.of("role", "user", "content", prompt)),
-            "temperature", 0.7
-        );
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-
-        // Simple JSON Parsing parser logic can be added, otherwise parse manually.
-        // For development robustness, we return the parsed content or fallback
-        logger.info("Successfully fetched questions from OpenAI");
-        return generateMockQuestions(skills, count); // Simple integration hook
+        try {
+            String content = callOpenAi(prompt);
+            return objectMapper.readValue(content, new TypeReference<List<Map<String, String>>>() {});
+        } catch (Exception e) {
+            logger.error("Failed to parse OpenAI response for questions", e);
+            throw new RuntimeException("Failed to generate questions from OpenAI", e);
+        }
     }
 
     private Map<String, Object> callOpenAiForEvaluation(String question, String answer) {
-        // Mocking the networking parser for safety, returning realistic structure
-        return evaluateMockAnswer(question, answer);
+        String prompt = String.format(
+            "Evaluate the following answer to this interview question.\nQuestion: %s\nAnswer: %s\n"
+            + "Respond ONLY in a JSON object format with keys: 'score' (integer 0-100) and 'feedback' (string with markdown formatting). "
+            + "Do not wrap in markdown or backticks.",
+            question, answer
+        );
+        try {
+            String content = callOpenAi(prompt);
+            return objectMapper.readValue(content, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            logger.error("Failed to parse OpenAI response for evaluation", e);
+            throw new RuntimeException("Failed to generate evaluation from OpenAI", e);
+        }
     }
 
     private String callOpenAiForRoadmap(List<String> skills, String targetJob) {
-        return generateMockRoadmap(skills, targetJob);
+        String prompt = String.format(
+            "Generate a dynamic week-by-week learning roadmap for a candidate aiming to be a '%s' with current skills: %s. "
+            + "Format as a clean markdown string with headers for weeks and focus areas.",
+            targetJob, String.join(", ", skills)
+        );
+        return callOpenAi(prompt);
     }
 
     private String callOpenAiForRecruiterInsights(String userName, List<String> skills, int averageScore) {
-        return generateMockRecruiterInsights(userName, skills, averageScore);
+        String prompt = String.format(
+            "Write a brief recruiter insights assessment (Executive Verdict) for candidate '%s' with skills: %s, who scored an average of %d/100 in mock interviews. "
+            + "Format as markdown.",
+            userName, String.join(", ", skills), averageScore
+        );
+        return callOpenAi(prompt);
     }
 
     // ==========================================

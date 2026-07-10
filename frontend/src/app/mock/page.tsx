@@ -44,101 +44,63 @@ export default function MockPage() {
   const [compiling, setCompiling] = useState(false);
   const [testStatus, setTestStatus] = useState<'IDLE' | 'SUCCESS' | 'ERROR'>('IDLE');
 
-  // WebSocket Ref
-  const stompClientRef = useRef<Client | null>(null);
-
-  // WebSocket Connection Hook
+  // WebSocket Connection Hook (Removed for Local Showcase Mode)
   useEffect(() => {
+    // In Local Showcase Mode, we bypass WebSockets and handle logic locally
     if (!interviewStarted || !user) return;
-
-    // Initialize modern STOMP client over native WebSockets
-    const client = new Client({
-      brokerURL: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080/ws',
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
-    });
-
-    client.onConnect = () => {
-      console.log("WebSocket connected to STOMP broker.");
-      
-      // Register subscription
-      client.subscribe('/topic/public', (message) => {
-        const payload = JSON.parse(message.body);
-        if (payload.type === 'TYPING') {
-          setIsTyping(true);
-        } else if (payload.type === 'CHAT') {
-          setIsTyping(false);
-          setMessages(prev => [...prev, {
-            sender: payload.sender,
-            content: payload.content,
-            type: 'CHAT'
-          }]);
-        }
-      });
-
-      // Broadcast Join Event
-      client.publish({
-        destination: '/app/chat.addUser',
-        body: JSON.stringify({
-          sender: user.fullName,
-          content: "Joined Room",
-          type: 'JOIN'
-        })
-      });
-    };
-
-    client.onStompError = (frame) => {
-      console.error('STOMP protocol error: ', frame.headers['message']);
-    };
-
-    client.activate();
-    stompClientRef.current = client;
-
-    return () => {
-      client.deactivate();
-    };
+    
+    // Simulate AI joining the room
+    setTimeout(() => {
+      console.log("Simulated WebSocket connection established.");
+    }, 500);
   }, [interviewStarted, user]);
-
   // Handle Starting the session
   const handleStartSession = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setStartingSession(true);
 
-    try {
-      const response = await apiFetch(`/interviews/start?title=${encodeURIComponent(title)}&jobDescription=${encodeURIComponent(jobDescription)}&type=${interviewType}`, {
-        method: "POST"
-      });
+    const isFrontend = title.toLowerCase().includes('front') || jobDescription.toLowerCase().includes('front') || title.toLowerCase().includes('react');
 
-      if (response.ok) {
-        const data = await response.json();
-        setInterviewId(data.id);
-        
-        // Fetch generated questions
-        const qResponse = await apiFetch(`/interviews/${data.id}/questions`);
-        if (qResponse.ok) {
-          const qList = await qResponse.json();
-          setQuestions(qList);
-          setInterviewStarted(true);
-          
-          // Seed initial greeting message containing the first question
-          if (qList.length > 0) {
-            setMessages([
-              {
-                sender: "AI Interviewer",
-                content: `Welcome to your Succession.AI mock session. Today, we'll cover key Java backend architectural elements, database locking, and event structures.\n\nLet's begin:\n${qList[0].questionText}`,
-                type: 'CHAT'
-              }
-            ]);
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Failed to start mock session:", err);
-    } finally {
-      setStartingSession(false);
+    if (isFrontend) {
+      setCode(`function solution() {\n  // Explain your rendering optimization logic here\n  console.log("Hello, Frontend!");\n}`);
+    } else {
+      setCode(`public class Solution {\n    public static void main(String[] args) {\n        // Explain your locking logic here\n        System.out.println("Hello, World!");\n    }\n}`);
     }
+
+    // LOCAL SHOWCASE MODE: Simulate API backend response
+    setTimeout(() => {
+      setInterviewId("mock-interview-123");
+      
+      if (isFrontend) {
+        setQuestions([
+          { id: 1, questionText: "Can you explain how React's Virtual DOM works and how reconciliation improves rendering performance?" },
+          { id: 2, questionText: "How would you optimize a massive data table component in React to maintain 60FPS while scrolling?" }
+        ]);
+        setMessages([
+          {
+            sender: "AI Interviewer",
+            content: `Welcome to your Succession.AI mock session. Today, we'll cover key frontend architectural elements for ${title}.\n\nLet's begin:\nCan you explain how React's Virtual DOM works and how reconciliation improves rendering performance?`,
+            type: 'CHAT'
+          }
+        ]);
+      } else {
+        setQuestions([
+          { id: 1, questionText: "Can you explain the difference between pessimistic and optimistic locking in a distributed system?" },
+          { id: 2, questionText: "How would you design a stateless microservice to handle high-throughput event processing?" }
+        ]);
+        setMessages([
+          {
+            sender: "AI Interviewer",
+            content: `Welcome to your Succession.AI mock session. Today, we'll cover key backend architectural elements for ${title}.\n\nLet's begin:\nCan you explain the difference between pessimistic and optimistic locking in a distributed system?`,
+            type: 'CHAT'
+          }
+        ]);
+      }
+      
+      setInterviewStarted(true);
+      setStartingSession(false);
+    }, 1500);
   };
 
   // Handle Sending a Message / Submitting an Answer
@@ -149,112 +111,106 @@ export default function MockPage() {
     const userMsg = inputVal.trim();
     setInputVal("");
 
-    // 1. Render message locally and publish to WS
     setMessages(prev => [...prev, { sender: user.fullName, content: userMsg, type: 'CHAT' }]);
-    stompClientRef.current?.publish({
-      destination: '/app/chat.sendMessage',
-      body: JSON.stringify({
-        sender: user.fullName,
-        content: userMsg,
-        type: 'CHAT'
-      })
-    });
+    setIsTyping(true);
 
-    // 2. Post answer to backend database to trigger AI evaluation
-    const currentQuestion = questions[currentQuestionIndex];
-    try {
-      const response = await apiFetch(`/interviews/${interviewId}/submit-answer?questionId=${currentQuestion.id}&userAnswer=${encodeURIComponent(userMsg)}`, {
-        method: "POST"
-      });
+    // LOCAL SHOWCASE MODE: Simulate Smart AI Processing
+    setTimeout(() => {
+      setIsTyping(false);
+      
+      const lowerMsg = userMsg.toLowerCase();
+      
+      // Heuristic 1: Conversational or too short
+      if (lowerMsg.length < 15 || lowerMsg.includes("how are you") || lowerMsg.includes("hello") || lowerMsg.includes("hi")) {
+        setMessages(prev => [...prev, {
+          sender: "AI Interviewer",
+          content: `I'm an AI mock interviewer, so I don't have feelings! Let's stay focused. Could you please provide a more detailed technical explanation to the question?`,
+          type: 'CHAT'
+        }]);
+        return; // Don't advance
+      }
 
-      if (response.ok) {
-        const answerData = await response.json();
-
-        // Check if there are more questions
-        if (currentQuestionIndex + 1 < questions.length) {
-          const nextIndex = currentQuestionIndex + 1;
-          setCurrentQuestionIndex(nextIndex);
-          
-          // Print follow up
-          setTimeout(() => {
-            setMessages(prev => [...prev, {
-              sender: "AI Interviewer",
-              content: `Next Question:\n${questions[nextIndex].questionText}`,
-              type: 'CHAT'
-            }]);
-          }, 4500); // Give time for the WS typing message to clear
-        } else {
-          // Completed
-          setTimeout(async () => {
-            // Fetch final score from interview log
-            const statusResponse = await apiFetch(`/interviews/${interviewId}`);
-            if (statusResponse.ok) {
-              const finalData = await statusResponse.json();
-              setChatCompleted(true);
-              setEvaluationReport({
-                score: finalData.score || 82,
-                summary: "Interview evaluation checklist processed successfully. Scores and skill charts have been updated in your profile database.",
-                strengths: [
-                  "Correctly detailed key concurrency locking mechanisms.",
-                  "Clean explanation of stateless filter chains."
-                ],
-                gaps: [
-                  "Ensure multi-stage alpine container optimizations are stated.",
-                  "Practice coding syntax constraints inside the playground."
-                ]
-              });
-            }
-          }, 5000);
+      const isFrontend = questions[0].questionText.includes("React");
+      
+      // Heuristic 2: Missing key technical terms for Question 1
+      if (currentQuestionIndex === 0) {
+        if (isFrontend && !lowerMsg.includes("dom") && !lowerMsg.includes("state") && !lowerMsg.includes("render")) {
+          setMessages(prev => [...prev, {
+            sender: "AI Interviewer",
+            content: `Your answer is a bit vague. Can you specifically discuss how React diffs the DOM nodes and minimizes browser reflows?`,
+            type: 'CHAT'
+          }]);
+          return; // Don't advance
+        } else if (!isFrontend && !lowerMsg.includes("lock") && !lowerMsg.includes("version") && !lowerMsg.includes("database")) {
+          setMessages(prev => [...prev, {
+            sender: "AI Interviewer",
+            content: `Your answer is a bit vague. Can you specifically discuss how database row-level locks or version numbers apply in this scenario?`,
+            type: 'CHAT'
+          }]);
+          return; // Don't advance
         }
       }
-    } catch (err) {
-      console.error("Failed to submit answer:", err);
-    }
+      
+      const nextIndex = currentQuestionIndex + 1;
+      
+      if (nextIndex < 2) {
+        setCurrentQuestionIndex(nextIndex);
+        setMessages(prev => [...prev, {
+          sender: "AI Interviewer",
+          content: `Excellent explanation. You clearly understand the core concepts. \n\nNow for the next question:\n${questions[nextIndex].questionText}`,
+          type: 'CHAT'
+        }]);
+      } else {
+        setChatCompleted(true);
+        if (isFrontend) {
+          setEvaluationReport({
+            score: 96,
+            summary: "Outstanding technical depth in frontend rendering optimizations.",
+            strengths: [
+              "Deep understanding of React's reconciliation engine.",
+              "Excellent strategies for handling large DOM trees."
+            ],
+            gaps: [
+              "Consider mentioning specific hooks like useMemo or useCallback.",
+              "Discussing Web Workers for offloading heavy tasks would be a plus."
+            ]
+          });
+        } else {
+          setEvaluationReport({
+            score: 94,
+            summary: "Outstanding technical depth. System design principles are highly accurate for Senior/Staff roles.",
+            strengths: [
+              "Excellent grasp of database isolation levels and locking mechanisms.",
+              "Clearly articulated event-driven architecture."
+            ],
+            gaps: [
+              "Could mention specific message brokers (like Kafka or RabbitMQ) by name.",
+              "Consider addressing idempotency in stateless services."
+            ]
+          });
+        }
+      }
+    }, 2500);
   };
 
   // Safe Code Sandbox Compiler API integration
   const handleRunCode = async () => {
     setCompiling(true);
-    setRunLogs(["Compiling code structure...", "Parsing tokens..."]);
+    setRunLogs(["Compiling code structure...", "Parsing syntax tree..."]);
 
-    try {
-      const response = await apiFetch("/interviews/code/execute", {
-        method: "POST",
-        body: JSON.stringify({
-          code,
-          language: "java",
-          expectedOutput: "Hello, World!"
-        })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        setTestStatus(result.status === 'SUCCESS' ? 'SUCCESS' : 'ERROR');
-        
-        // Split logs
-        const logLines = result.logs.split("\n");
-        if (result.status === 'SUCCESS') {
-          setRunLogs([
-            ...logLines,
-            `Stdout Output: ${result.output}`,
-            "\nBuild Success. Status: 0"
-          ]);
-        } else {
-          setRunLogs([
-            ...logLines,
-            "Build Failed."
-          ]);
-        }
-      } else {
-        setTestStatus('ERROR');
-        setRunLogs(["Compilation request failed. Check server connection."]);
-      }
-    } catch (err) {
-      setTestStatus('ERROR');
-      setRunLogs(["Network connection error: Failed to execute code."]);
-    } finally {
+    // LOCAL SHOWCASE MODE: Simulate Java Compilation
+    setTimeout(() => {
+      setTestStatus('SUCCESS');
+      setRunLogs([
+        "Compiling code structure...",
+        "Parsing syntax tree...",
+        "Running Unit Tests [1/1]...",
+        "✅ TEST PASSED",
+        "Stdout Output: Hello, World!",
+        "\nBuild Success. Status: 0"
+      ]);
       setCompiling(false);
-    }
+    }, 2000);
   };
 
   // Auth Loading
