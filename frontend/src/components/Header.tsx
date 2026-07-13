@@ -131,9 +131,9 @@ export default function Header() {
                   <Link
                     href={item.path}
                     ref={(el) => { linkRefs.current[index] = el; }}
-                    className={`group flex items-baseline gap-4 md:gap-12 w-fit cursor-pointer ${isActive ? 'opacity-50' : 'hover:opacity-70'} transition-opacity`}
+                    className={`group flex items-center gap-4 md:gap-12 w-fit cursor-pointer ${isActive ? 'opacity-50' : 'hover:opacity-70'} transition-opacity`}
                   >
-                    <span className="font-mono text-sm md:text-xl text-gray-400">
+                    <span className="font-mono text-sm md:text-xl text-gray-400 w-8 md:w-12 text-left">
                       {item.number}
                     </span>
                     <span className="font-display text-5xl md:text-[8vw] font-black uppercase leading-none tracking-tighter">

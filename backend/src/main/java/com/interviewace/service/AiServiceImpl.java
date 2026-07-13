@@ -75,6 +75,30 @@ public class AiServiceImpl implements AiService {
         return generateMockRecruiterInsights(userName, skills, averageScore);
     }
 
+    @Override
+    public Map<String, Object> analyzeResume(String resumeText) {
+        if (isApiKeyConfigured()) {
+            try {
+                return callOpenAiForResumeAnalysis(resumeText);
+            } catch (Exception e) {
+                logger.warn("OpenAI API call failed, falling back to mock resume analysis: {}", e.getMessage());
+            }
+        }
+        return generateMockResumeAnalysis(resumeText);
+    }
+
+    @Override
+    public String generateFollowUp(String originalQuestion, String candidateAnswer) {
+        if (isApiKeyConfigured()) {
+            try {
+                return callOpenAiForFollowUp(originalQuestion, candidateAnswer);
+            } catch (Exception e) {
+                logger.warn("OpenAI API call failed, falling back to mock follow up: {}", e.getMessage());
+            }
+        }
+        return generateMockFollowUp(originalQuestion, candidateAnswer);
+    }
+
     private boolean isApiKeyConfigured() {
         return apiKey != null && !apiKey.trim().isEmpty() && !apiKey.startsWith("placeholder");
     }
@@ -155,6 +179,31 @@ public class AiServiceImpl implements AiService {
             "Write a brief recruiter insights assessment (Executive Verdict) for candidate '%s' with skills: %s, who scored an average of %d/100 in mock interviews. "
             + "Format as markdown.",
             userName, String.join(", ", skills), averageScore
+        );
+        return callOpenAi(prompt);
+    }
+
+    private Map<String, Object> callOpenAiForResumeAnalysis(String resumeText) {
+        String prompt = String.format(
+            "Analyze the following resume text and extract the candidate's core technical skills (up to 10), and write a short 2-sentence experience summary and a brief analysis report.\n\nResume Text: %s\n\n"
+            + "Respond ONLY in a JSON object format with keys: 'skills' (array of strings), 'experienceSummary' (string), and 'analysisReport' (string). "
+            + "Do not wrap in markdown or backticks.",
+            resumeText.length() > 3000 ? resumeText.substring(0, 3000) : resumeText
+        );
+        try {
+            String content = callOpenAi(prompt);
+            return objectMapper.readValue(content, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            logger.error("Failed to parse OpenAI response for resume analysis", e);
+            throw new RuntimeException("Failed to generate resume analysis from OpenAI", e);
+        }
+    }
+
+    private String callOpenAiForFollowUp(String originalQuestion, String candidateAnswer) {
+        String prompt = String.format(
+            "The candidate was asked: '%s'\nThey answered: '%s'\n"
+            + "Generate a brief, conversational follow-up question to probe deeper into their answer or address a gap. Keep it to one sentence.",
+            originalQuestion, candidateAnswer
         );
         return callOpenAi(prompt);
     }
@@ -281,5 +330,17 @@ public class AiServiceImpl implements AiService {
                 + (averageScore >= 80 
                     ? "🌟 **Strong Technical Asset:** The candidate exhibits deep conceptual clarity. Recommended for direct scheduling with engineering managers."
                     : "📈 **Growth Potential:** Shows good foundations but needs mock sessions on system architecture and containerization.");
+    }
+
+    private Map<String, Object> generateMockResumeAnalysis(String resumeText) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("skills", Arrays.asList("Java", "Spring Boot", "React", "PostgreSQL"));
+        result.put("experienceSummary", "Mock profile showing backend service architecture experience.");
+        result.put("analysisReport", "### Resume Feedback Report\n\n- Strong Java foundations.\n- Needs more cloud experience metrics.");
+        return result;
+    }
+
+    private String generateMockFollowUp(String originalQuestion, String candidateAnswer) {
+        return "That makes sense. Can you explain how you would handle scaling that approach under heavy load?";
     }
 }

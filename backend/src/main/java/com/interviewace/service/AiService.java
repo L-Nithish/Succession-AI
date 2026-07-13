@@ -8,4 +8,6 @@ public interface AiService {
     Map<String, Object> evaluateAnswer(String question, String answer);
     String generateRoadmap(List<String> skills, String targetJob);
     String generateRecruiterInsights(String userName, List<String> skills, int averageScore);
+    Map<String, Object> analyzeResume(String resumeText);
+    String generateFollowUp(String originalQuestion, String candidateAnswer);
 }

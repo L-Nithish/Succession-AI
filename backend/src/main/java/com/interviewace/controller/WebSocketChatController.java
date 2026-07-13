@@ -1,6 +1,7 @@
 package com.interviewace.controller;
 
 import com.interviewace.dto.ChatMessage;
+import com.interviewace.service.AiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -10,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 public class WebSocketChatController {
@@ -17,9 +19,17 @@ public class WebSocketChatController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
+    private AiService aiService;
+
+    // Track the last question asked by the AI per session
+    private final ConcurrentHashMap<String, String> sessionLastQuestion = new ConcurrentHashMap<>();
+
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
+    public ChatMessage sendMessage(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        
         // If it's a standard user chat message, simulate the AI responding asynchronously
         if (chatMessage.getType() == ChatMessage.MessageType.CHAT) {
             CompletableFuture.runAsync(() -> {
@@ -33,11 +43,16 @@ public class WebSocketChatController {
                             .build();
                     messagingTemplate.convertAndSend("/topic/public", typingMessage);
 
-                    // Step 2: Wait 2.5 seconds and emit the actual follow-up message
-                    Thread.sleep(2500);
+                    // Step 2: Generate real AI follow up
+                    String originalQuestion = sessionLastQuestion.getOrDefault(sessionId, "General interview question");
+                    String aiResponse = aiService.generateFollowUp(originalQuestion, chatMessage.getContent());
+                    
+                    // Save this response as the new last question for context
+                    sessionLastQuestion.put(sessionId, aiResponse);
+
                     ChatMessage responseMessage = ChatMessage.builder()
                             .sender("AI Interviewer")
-                            .content("That is a comprehensive explanation. To test your depth, how would you design this to maintain high performance under vertical scaling constraints, particularly regarding connection pooling or partition limits?")
+                            .content(aiResponse)
                             .type(ChatMessage.MessageType.CHAT)
                             .build();
                     messagingTemplate.convertAndSend("/topic/public", responseMessage);

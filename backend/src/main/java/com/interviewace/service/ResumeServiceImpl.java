@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,6 +34,9 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Autowired
     private SkillProgressRepository skillProgressRepository;
+
+    @Autowired
+    private AiService aiService;
 
     public ResumeServiceImpl() {
         // Define storage location relative to workspace root
@@ -61,13 +66,14 @@ public class ResumeServiceImpl implements ResumeService {
         // Save file to uploads folder
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-        // Read basic content (if text-based) or mock extraction
-        String contentText = extractText(file);
+        // Read basic content (if text-based) or PDF extraction
+        String contentText = extractText(targetLocation, file.getContentType());
 
-        // Analyze content and extract skills
-        List<String> skills = analyzeSkills(contentText);
-        String experienceSummary = generateExperienceSummary(contentText, user.getFullName());
-        String analysisReport = generateMockAnalysisReport(skills, user.getFullName());
+        // Analyze content dynamically using AI
+        Map<String, Object> aiAnalysis = aiService.analyzeResume(contentText);
+        List<String> skills = (List<String>) aiAnalysis.getOrDefault("skills", Arrays.asList("Java", "Spring Boot", "React"));
+        String experienceSummary = (String) aiAnalysis.getOrDefault("experienceSummary", "Experienced Software Engineer.");
+        String analysisReport = (String) aiAnalysis.getOrDefault("analysisReport", "Resume analysis completed.");
 
         // Create Resume Entity
         Resume resume = Resume.builder()
@@ -112,51 +118,22 @@ public class ResumeServiceImpl implements ResumeService {
         resumeRepository.delete(resume);
     }
 
-    private String extractText(MultipartFile file) {
-        // Simple extraction for demo: read basic text files or fallback to metadata
+    private String extractText(Path filePath, String contentType) {
         try {
-            String contentType = file.getContentType();
-            if (contentType != null && (contentType.contains("text") || contentType.contains("json"))) {
-                return new String(file.getBytes());
+            if (contentType != null && contentType.contains("pdf")) {
+                try (PDDocument document = PDDocument.load(filePath.toFile())) {
+                    PDFTextStripper stripper = new PDFTextStripper();
+                    return stripper.getText(document);
+                }
+            } else {
+                return new String(Files.readAllBytes(filePath));
             }
         } catch (Exception e) {
-            // Ignore and fallback
-        }
-        // Fallback mock resume text
-        return "Experienced Software Engineer. Core expertise in building Java backend microservices using Spring Boot, JPA, and PostgreSQL. "
+            // Fallback mock resume text
+            return "Experienced Software Engineer. Core expertise in building Java backend microservices using Spring Boot, JPA, and PostgreSQL. "
                 + "Proficient in frontend components with React, TypeScript, and Tailwind CSS. Familiar with deployment pipelines using Docker, "
                 + "Kubernetes, Redis caching, and Kafka event streaming platforms. Worked on scalable REST APIs and AWS cloud environments.";
-    }
-
-    private List<String> analyzeSkills(String content) {
-        String[] keywords = {"Java", "Spring Boot", "React", "TypeScript", "PostgreSQL", "Docker", "Kafka", "AWS", "Python", "Kubernetes", "Redis", "Security"};
-        List<String> matchedSkills = new ArrayList<>();
-        String lowerContent = content.toLowerCase();
-
-        for (String skill : keywords) {
-            if (lowerContent.contains(skill.toLowerCase())) {
-                matchedSkills.add(skill);
-            }
         }
-
-        if (matchedSkills.isEmpty()) {
-            matchedSkills.addAll(Arrays.asList("Java", "Spring Boot", "React"));
-        }
-        return matchedSkills;
-    }
-
-    private String generateExperienceSummary(String content, String name) {
-        return "Software Engineer profile identified for " + name + ". Shows 3+ years of experience focusing on backend service architecture, relational database schemas, and modern responsive frontend design.";
-    }
-
-    private String generateMockAnalysisReport(List<String> skills, String name) {
-        return "### Resume Feedback Report for " + name + "\n\n"
-                + "#### Key Strengths\n"
-                + "- **Strong Stack Alignment:** Detected core competencies in: " + String.join(", ", skills) + ".\n"
-                + "- **Microservices Ready:** Resume outlines experience in horizontal scaling, REST APIs, and database mapping.\n\n"
-                + "#### Areas of Improvement\n"
-                + "- **System Design Detail:** Include more metrics regarding latency optimizations or caching strategies (e.g. Redis implementations).\n"
-                + "- **Testing Coverage:** Add details about unit testing coverage levels (e.g. JUnit, Mockito) or automated CI/CD checks.";
     }
 
     private void updateUserSkillProgress(User user, List<String> skills) {
